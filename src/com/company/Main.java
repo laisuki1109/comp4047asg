@@ -67,9 +67,9 @@ public class Main {
 	static ArrayList<String> blacklist_words = new ArrayList<String>();
 	static ArrayList<String> blacklist_urls = new ArrayList<String>();
 	static ArrayList<String> keywords = new ArrayList<String>();
-	static String[] urlPool;
-	static UrlObject[] processedUrlPool;
 	
+	static ArrayList<String> uniqueWords = new ArrayList<String>();
+	static ArrayList<Integer> WordsCount = new ArrayList<Integer>();
 	
     public static String loadPlainText(String urlString) throws IOException {
         MyParserCallback callback = new MyParserCallback();
@@ -101,25 +101,43 @@ public class Main {
     }
 
     // The function to separate string output
-    public static List<String> getUniqueWords(String text) {
+    public static void getUniqueWords(String text, int fileIndex) throws IOException {
         String[] words = text.split("[\\d\\W]+");
-        ArrayList<String> uniqueWords = new ArrayList<String>();
+        
 
-        for (String w : words) {
-            w = w.toLowerCase();
 
-            if (!uniqueWords.contains(w))
-                uniqueWords.add(w);
-        }
+	    for (String w : words) {
+	        w = w.toLowerCase();
+	        if( !ignore_words.contains(w)) {
+	        if (!uniqueWords.contains(w) ) {
+	            uniqueWords.add(w);
+	        	WordsCount.add(1);
+	        }else {
+	        	int a = uniqueWords.indexOf(w);
+	        	int b = WordsCount.get(a) + 1;
+	        	WordsCount.set(a,b);	        		
+	        		
+	        	}	}
+	    }
+	    
+	    
+	    FileWriter writer = new FileWriter("keywordTemp_" + fileIndex+ ".txt"); 
+	    for(int i = 0; i < uniqueWords.size(); i++) {
+	    	String str = uniqueWords.get(i) + " "+ WordsCount.get(i);
+	    	
+	      writer.write( str+ System.lineSeparator());
+	    }
+	    writer.close();
+	    
         // abc order (joe instant function(?)
-        uniqueWords.sort(new Comparator<String>() {
-            @Override
-            public int compare(String a, String b) {
-                return a.compareTo(b);
-            }
-        });
+//        uniqueWords.sort(new Comparator<String>() {
+//            @Override
+//            public int compare(String a, String b) {
+//                return a.compareTo(b);
+//            }
+//        });
 
-        return uniqueWords;
+	   
     }
     
     //check it is an absoulte url
@@ -188,42 +206,32 @@ public class Main {
     }
 */
     public static void main(String[] args) throws IOException {
+    	
         // write your code here
     	//get the ignore words, blacklist words,url into array list
-    	/*
+    	
     	try {
     		readfile();
     	}catch(Exception e) {
     		System.out.println(e);
     	}
-    	*/
-    	Scanner in = new Scanner(System.in);  
     	
-    	//define the length of url pool
-        System.out.println("Enter x");
-        int x = in.nextInt();
-        urlPool = new String[x];
-        
-        // define the length of processed url pool
-        System.out.println("Enter y");
-        int y = in.nextInt();
-        processedUrlPool = new UrlObject[y];
-        
-        //put the url into urlPool array
         String url = "http://comp.hkbu.edu.hk/v1/";
-        urlPool[0]=url;
-        
-            //System.out.println(loadPlainText(url));
-            //System.out.println(getUniqueWords((loadPlainText(url))));
+           // System.out.println(loadPlainText(url));
+           getUniqueWords((loadPlainText(url)),1); //hardcode of index1
             //System.out.println(getURLs(url));
 
         System.out.println("hello");
 
-        FileWriter writer = new FileWriter("output.txt"); 
-    	for(String str: getUniqueWords(loadPlainText(url))) {
-    	  writer.write(str + System.lineSeparator());
-    	}
-    	writer.close();
+//        FileWriter writer = new FileWriter("output.txt"); 
+//    	for(String str: getUniqueWords(loadPlainText(url))) {
+//    	  writer.write(str + System.lineSeparator());
+//    	}
+//    	writer.close();
+        
+        //System.out.println(uniqueWords);
+	   // System.out.println(WordsCount);
+        
     }
 
 }
