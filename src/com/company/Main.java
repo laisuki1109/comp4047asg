@@ -4,6 +4,8 @@ import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.parser.ParserDelegator;
+
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -13,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Scanner;
 
 class MyParserCallback extends HTMLEditorKit.ParserCallback {
     public String content = new String();
@@ -58,8 +61,14 @@ class MyParserCallback extends HTMLEditorKit.ParserCallback {
 }
 
 public class Main {
-    //      get the html content without tags
+     //      get the html content without tags
     // the function call Parse package function
+	
+	static ArrayList<String> ignore_words = new ArrayList<String>();
+	static ArrayList<String> blacklist_words = new ArrayList<String>();
+	static ArrayList<String> blacklist_urls = new ArrayList<String>();
+	
+	
     public static String loadPlainText(String urlString) throws IOException {
         MyParserCallback callback = new MyParserCallback();
         ParserDelegator parser = new ParserDelegator();
@@ -134,6 +143,28 @@ public class Main {
 
         return url;
     }
+    public static void readfile() {
+    	try {
+    		File ignore_word_file = new File("src/ignore_of_words.txt");
+    		File blacklist_word_file = new File("src/blacklist_of_words.txt");
+    		File blacklist_url_file = new File("src/blacklist_of_urls.txt");
+    		Scanner igsc = new Scanner(ignore_word_file);
+    		Scanner bwsc = new Scanner(blacklist_word_file);
+    		Scanner busc = new Scanner(blacklist_url_file);
+    		while(igsc.hasNextLine()) {
+    			ignore_words.add(igsc.nextLine());
+    		}
+    		while(bwsc.hasNextLine()) {
+    			blacklist_words.add(bwsc.nextLine());
+    		}
+    		while(busc.hasNextLine()) {
+    			blacklist_urls.add(busc.nextLine());
+    		}
+    		
+    	}catch(Exception e) {
+    		System.out.println(e);
+    	}
+    }
 
 
 
@@ -156,10 +187,16 @@ public class Main {
 */
     public static void main(String[] args) throws IOException {
         // write your code here
+    	try {
+    		readfile();
+    	}catch(Exception e) {
+    		System.out.println(e);
+    	}
+    	
         String url = "http://comp.hkbu.edu.hk/v1/";
-            System.out.println(loadPlainText(url));
-            System.out.println(getUniqueWords((loadPlainText(url))));
-            System.out.println(getURLs(url));
+            //System.out.println(loadPlainText(url));
+            //System.out.println(getUniqueWords((loadPlainText(url))));
+            //System.out.println(getURLs(url));
 
         System.out.println("hello");
 

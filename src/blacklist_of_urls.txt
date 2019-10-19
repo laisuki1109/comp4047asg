@@ -1,0 +1,3 @@
+http://www.weibo.com/*
+http://www.sci.hkbu.edu.hk/eng/about-us/deans-message/*
+http://www.comp.hkbu.edu.hk/v1/?page=people
