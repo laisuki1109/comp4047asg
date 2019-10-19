@@ -67,6 +67,8 @@ public class Main {
 	static ArrayList<String> blacklist_words = new ArrayList<String>();
 	static ArrayList<String> blacklist_urls = new ArrayList<String>();
 	static ArrayList<String> keywords = new ArrayList<String>();
+	static String[] urlPool;
+	static UrlObject[] processedUrlPool;
 	
 	
     public static String loadPlainText(String urlString) throws IOException {
@@ -195,8 +197,23 @@ public class Main {
     		System.out.println(e);
     	}
     	*/
+    	Scanner in = new Scanner(System.in);  
+    	
+    	//define the length of url pool
+        System.out.println("Enter x");
+        int x = in.nextInt();
+        urlPool = new String[x];
+        
+        // define the length of processed url pool
+        System.out.println("Enter y");
+        int y = in.nextInt();
+        processedUrlPool = new UrlObject[y];
+        
+        //put the url into urlPool array
         String url = "http://comp.hkbu.edu.hk/v1/";
-            System.out.println(loadPlainText(url));
+        urlPool[0]=url;
+        
+            //System.out.println(loadPlainText(url));
             //System.out.println(getUniqueWords((loadPlainText(url))));
             //System.out.println(getURLs(url));
 
