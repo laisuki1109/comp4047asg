@@ -27,9 +27,8 @@ class MyParserCallback extends HTMLEditorKit.ParserCallback {
     	if(!isStyle) {
     		content += new String(data) + " ";
     		}
-        
     }
-    
+
     // Override handleStartTag() of the parent's class
     @Override
     public void handleStartTag(HTML.Tag tag, MutableAttributeSet attrSet, int pos)
@@ -48,16 +47,15 @@ class MyParserCallback extends HTMLEditorKit.ParserCallback {
                 }
             }
         }
+        // to check the starttag if start tag is style or script do not print anything
         else if (tag == HTML.Tag.STYLE) {
-        	System.out.println("Style tag");
         	isStyle=true;
         }
-//        }else if(tag== HTML.Tag.SCRIPT) {
-//        	System.out.println("Script tag");
-//        }
+        else if (tag == HTML.Tag.SCRIPT) {
+        	isStyle=true;
+        } 
     }
     
-
 }
 
 public class Main {
@@ -187,14 +185,16 @@ public class Main {
 */
     public static void main(String[] args) throws IOException {
         // write your code here
+    	//get the ignore words, blacklist words,url into array list
+    	/*
     	try {
     		readfile();
     	}catch(Exception e) {
     		System.out.println(e);
     	}
-    	
+    	*/
         String url = "http://comp.hkbu.edu.hk/v1/";
-            //System.out.println(loadPlainText(url));
+            System.out.println(loadPlainText(url));
             //System.out.println(getUniqueWords((loadPlainText(url))));
             //System.out.println(getURLs(url));
 
