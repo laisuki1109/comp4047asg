@@ -188,40 +188,41 @@ public class Main {
     		System.out.println(e);
     	}
     }
-    public static void isVaildUrl(String url) {
-    	boolean isVaild =true;
+    
+    public static void isValidUrl(String url) {
+    	boolean isValid =true;
     	if (!urlPool.contains(url)) {
     		if(urlPool.size() < x) {
     			// not in processed url pool
     			for (int i =0; i < processedUrlPool.size();i++) {
     				if(processedUrlPool.get(i).url.equals(url)) {
-    					isVaild=false;
+    					isValid=false;
     					break;
     				}
     			}
-    			if(isVaild) {
+    			if(isValid) {
     				//check black list
     				for (int i =0; i < blacklist_urls.size();i++) {
         				if(blacklist_urls.get(i).substring(blacklist_urls.get(i).length()-1).equals("*")) {
         					if((blacklist_urls.get(i).length()-1) <= url.length()) {
         						if (url.substring(0, blacklist_urls.get(i).length()-1).equals(blacklist_urls.get(i).substring(0,blacklist_urls.get(i).length()-1))) {
-        							isVaild= false;
+        							isValid= false;
         							break;
         						}
         					}
         				}else if (url.equals(blacklist_urls.get(i))) {
-        					isVaild =false;
+        					isValid =false;
         					break;
         				}
         			}
     			}
     		}else {
-    			isVaild =false;
+    			isValid =false;
     		}
     	}else {
-    		isVaild = false;
+    		isValid = false;
     	}
-    	if (isVaild) {
+    	if (isValid) {
     		urlPool.add(url);
     	}
     }
@@ -261,7 +262,7 @@ public class Main {
     	
     	
         String url = "http://comp.hkbu.edu.hk/v1/";
-        urlPool.add(url);
+        isValidUrl(url);
         
         
         
