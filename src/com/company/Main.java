@@ -65,6 +65,7 @@ public class Main {
 	static ArrayList<String> ignore_words = new ArrayList<String>();
 	static ArrayList<String> blacklist_words = new ArrayList<String>();
 	static ArrayList<String> blacklist_urls = new ArrayList<String>();
+	static ArrayList<String> keywords = new ArrayList<String>();
 	
 	
     public static String loadPlainText(String urlString) throws IOException {
