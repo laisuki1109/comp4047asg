@@ -6,6 +6,7 @@ import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.parser.ParserDelegator;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -201,7 +202,11 @@ public class Main {
 
         System.out.println("hello");
 
-
+        FileWriter writer = new FileWriter("output.txt"); 
+    	for(String str: getUniqueWords(loadPlainText(url))) {
+    	  writer.write(str + System.lineSeparator());
+    	}
+    	writer.close();
     }
 
 }
