@@ -67,7 +67,10 @@ public class Main {
 	static ArrayList<String> blacklist_words = new ArrayList<String>();
 	static ArrayList<String> blacklist_urls = new ArrayList<String>();
 	static ArrayList<String> keywords = new ArrayList<String>();
-	
+	static ArrayList<String> urlPool = new ArrayList<String>();
+	static ArrayList<UrlObject> processedUrlPool = new ArrayList<UrlObject>();
+	static int x;
+	static int y;
 	static ArrayList<String> uniqueWords = new ArrayList<String>();
 	static ArrayList<Integer> WordsCount = new ArrayList<Integer>();
 	
@@ -185,7 +188,43 @@ public class Main {
     		System.out.println(e);
     	}
     }
-
+    public static void isVaildUrl(String url) {
+    	boolean isVaild =true;
+    	if (!urlPool.contains(url)) {
+    		if(urlPool.size() < x) {
+    			// not in processed url pool
+    			for (int i =0; i < processedUrlPool.size();i++) {
+    				if(processedUrlPool.get(i).url.equals(url)) {
+    					isVaild=false;
+    					break;
+    				}
+    			}
+    			if(isVaild) {
+    				//check black list
+    				for (int i =0; i < blacklist_urls.size();i++) {
+        				if(blacklist_urls.get(i).substring(blacklist_urls.get(i).length()-1).equals("*")) {
+        					if((blacklist_urls.get(i).length()-1) <= url.length()) {
+        						if (url.substring(0, blacklist_urls.get(i).length()-1).equals(blacklist_urls.get(i).substring(0,blacklist_urls.get(i).length()-1))) {
+        							isVaild= false;
+        							break;
+        						}
+        					}
+        				}else if (url.equals(blacklist_urls.get(i))) {
+        					isVaild =false;
+        					break;
+        				}
+        			}
+    			}
+    		}else {
+    			isVaild =false;
+    		}
+    	}else {
+    		isVaild = false;
+    	}
+    	if (isVaild) {
+    		urlPool.add(url);
+    	}
+    }
 
 
     //get all the html content with tag
@@ -215,8 +254,18 @@ public class Main {
     	}catch(Exception e) {
     		System.out.println(e);
     	}
+    	Scanner in = new Scanner(System.in);
+    	System.out.println("Enter x value :");
+    	x = in.nextInt();
+    	
+    	
     	
         String url = "http://comp.hkbu.edu.hk/v1/";
+        urlPool.add(url);
+        
+        
+        
+        System.out.println(urlPool);
            // System.out.println(loadPlainText(url));
            getUniqueWords((loadPlainText(url)),1); //hardcode of index1
             //System.out.println(getURLs(url));
