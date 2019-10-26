@@ -175,9 +175,9 @@ public class Main {
 			
 			
 			//print the keywordUrlMap
-			for (String i : keywordUrlMap.keySet()) {
-				System.out.println("key: " + i + " value: " + keywordUrlMap.get(i));
-			}
+//			for (String i : keywordUrlMap.keySet()) {
+//				System.out.println("key: " + i + " value: " + keywordUrlMap.get(i));
+//			}
 			
 
 		}
@@ -250,31 +250,37 @@ public class Main {
 				for (int i = 0; i < processedUrlPool.size(); i++) {
 					if (processedUrlPool.get(i).equals(url)) {
 						isValid = false;
+						System.out.println(url+" The url is processed already");
 						break;
 					}
 				}
 				if (isValid) {
 					// check black list
 					for (int i = 0; i < blacklist_urls.size(); i++) {
+						//check the blacklist url with "*"
 						if (blacklist_urls.get(i).substring(blacklist_urls.get(i).length() - 1).equals("*")) {
 							if ((blacklist_urls.get(i).length() - 1) <= url.length()) {
 								if (url.substring(0, blacklist_urls.get(i).length() - 1).equals(
 										blacklist_urls.get(i).substring(0, blacklist_urls.get(i).length() - 1))) {
 									isValid = false;
+									System.out.println(url+" url is in the blacklist");
 									break;
 								}
 							}
 						} else if (url.equals(blacklist_urls.get(i))) {
 							isValid = false;
+							System.out.println(url+" url is in the blacklist");
 							break;
 						}
 					}
 				}
 			} else {
 				isValid = false;
+				System.out.println("url pool is full");
 			}
 		} else {
 			isValid = false;
+			System.out.println(url+" urllink is already in url pool");
 		}
 		if (isValid) {
 			urlPool.add(url);
@@ -291,7 +297,7 @@ public class Main {
 	 */
 	public static void main(String[] args) throws IOException {
 
-		// write your code here
+		//main logic
 		// get the ignore words, blacklist words,url into array list
 
 		try {
@@ -302,35 +308,47 @@ public class Main {
 		Scanner in = new Scanner(System.in);
 		System.out.println("Enter x value :");
 		x = in.nextInt();
-
-		String url = "http://comp.hkbu.edu.hk/v1/";
-		isValidUrl(url);
-
-		System.out.println(urlPool);
-		// System.out.println(loadPlainText(url));
-		getUniqueWords((loadPlainText(url)), 1); // hardcode of index1
-		processedUrlPool.add(urlPool.get(0));
-		urlPool.remove(0);
-		isValidUrl("https://www.sanrio.com/");
-		getUniqueWords((loadPlainText("https://www.sanrio.com/")), 1); // hardcode of index1
-		// System.out.println(getURLs(url));
 		
+		System.out.println("Enter y value :");
+		y = in.nextInt();
+		
+		System.out.println("Enter the url :");
+		String url = in.next();
+		isValidUrl(url);
+		
+		if(urlPool.size()>0) {
+		while(processedUrlPool.size()<y) {
+			System.out.println(urlPool);
+			// System.out.println(loadPlainText(url));
+			getUniqueWords((loadPlainText(urlPool.get(0))), 1); //insert the key value pair in keywordUrlPool hashmap
+			List<String> urlList =getURLs(url);
+			System.out.println(urlList);
+			processedUrlPool.add(urlPool.get(0)); // insert the url into processed url pool
+			urlPool.remove(0); //delete in url pool
+			
+			for (String temp : urlList) {
+				isValidUrl(temp);
+				}
+			
+			}
+		}else {
+			System.out.println("Invalid link");
+		}
 		//serialize the hashmap
-		try
-        {
-               FileOutputStream fos =
-                  new FileOutputStream("hashmap.ser");
-               ObjectOutputStream oos = new ObjectOutputStream(fos);
-               oos.writeObject(keywordUrlMap);
-               oos.close();
-               fos.close();
-               System.out.println("Serialized HashMap data is saved in hashmap.ser");
-        }catch(IOException ioe)
-         {
-               ioe.printStackTrace();
-         }
+//		try
+//        {
+//               FileOutputStream fos =
+//                  new FileOutputStream("hashmap.ser");
+//               ObjectOutputStream oos = new ObjectOutputStream(fos);
+//               oos.writeObject(keywordUrlMap);
+//               oos.close();
+//               fos.close();
+//               System.out.println("Serialized HashMap data is saved in hashmap.ser");
+//        }catch(IOException ioe)
+//         {
+//               ioe.printStackTrace();
+//         }
 
-		System.out.println("hello");
 		
 		// de-serial the hash map
 //		 try
@@ -355,6 +373,11 @@ public class Main {
 //	         return;
 //	      }
 		 
+		 System.out.println(urlPool);
+		 System.out.println(processedUrlPool);
+		for (String i : keywordUrlMap.keySet()) {
+			System.out.println("key: " + i + " value: " + keywordUrlMap.get(i));
+		}
 
 
 	}

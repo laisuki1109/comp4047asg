@@ -17,7 +17,7 @@ public class UrlObject implements Serializable{
 	
 	@Override
 	public String toString() {
-		return "This url link is "+url+" , title : "+title+"number of appear "+numberAppear ;
+		return "This url link is "+url+" , title : "+title+" , "+numberAppear ;
 	}
 	@Override
 	public int hashCode() {
