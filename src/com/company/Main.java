@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -86,102 +87,122 @@ public class Main {
 	static ArrayList<String> processedUrlPool = new ArrayList<String>();
 	static int x;
 	static int y;
-//	static ArrayList<String> uniqueWords = new ArrayList<String>();
-//	static ArrayList<Integer> WordsCount = new ArrayList<Integer>();
 	static HashMap<String, Set<UrlObject>> keywordUrlMap = new HashMap<String, Set<UrlObject>>();
 
-	public static String loadPlainText(String urlString) throws IOException {
-		MyParserCallback callback = new MyParserCallback();
-		ParserDelegator parser = new ParserDelegator();
+	public static String loadPlainText(String urlString) {
+		try {
+			MyParserCallback callback = new MyParserCallback();
+			ParserDelegator parser = new ParserDelegator();
 
-		URL url = new URL(urlString);
-		InputStreamReader reader = new InputStreamReader(url.openStream());
-		parser.parse(reader, callback, true); // call MyParserCallback to process the URL stream
+			URL url = new URL(urlString);
+			InputStreamReader reader = new InputStreamReader(url.openStream());
+			parser.parse(reader, callback, true); // call MyParserCallback to process the URL stream
 
-		return callback.content;
+			return callback.content;
+		} catch (Exception e) {
+			return null;
+		}
 	}
 
 	// The function to call Parser.CallBackHandle start tags
-	public static List<String> getURLs(String srcPage) throws IOException {
-		URL url = new URL(srcPage);
-		InputStreamReader reader = new InputStreamReader(url.openStream());
+	public static List<String> getURLs(String srcPage) {
+		try {
+			URL url = new URL(srcPage);
+			InputStreamReader reader = new InputStreamReader(url.openStream());
 
-		ParserDelegator parser = new ParserDelegator();
-		MyParserCallback callback = new MyParserCallback();
-		parser.parse(reader, callback, true);
-		// parse the result to callback
-		for (int i = 0; i < callback.urls.size(); i++) {
-			String str = callback.urls.get(i);
-			if (!isAbsURL(str)) {
-				callback.urls.set(i, toAbsURL(str, url).toString());
+			ParserDelegator parser = new ParserDelegator();
+			MyParserCallback callback = new MyParserCallback();
+			parser.parse(reader, callback, true);
+			// parse the result to callback
+			for (int i = 0; i < callback.urls.size(); i++) {
+				String str = callback.urls.get(i);
+				if (!isAbsURL(str)) {
+
+					callback.urls.set(i, toAbsURL(str, url).toString());
+
+				}
 			}
+			return callback.urls;
+		} catch (Exception e) {
+			return null;
 		}
-		return callback.urls;
 	}
 
 	// The function to separate string output
 	public static void getUniqueWords(String text, int fileIndex) throws IOException {
-		String[] words = text.split("[\\d\\W]+");
-		// get the url link and store in UrlObject
-		URL url = new URL(urlPool.get(0));
-		InputStreamReader reader = new InputStreamReader(url.openStream());
-		ParserDelegator parser = new ParserDelegator();
-		MyParserCallback callback = new MyParserCallback();
-		parser.parse(reader, callback, true);
-		// default as appear only 1
+		if (text != null) {
+			String[] words = text.split("[\\d\\W]+");
+			// get the url link and store in UrlObject
+			URL url = new URL(urlPool.get(0));
+			InputStreamReader reader = new InputStreamReader(url.openStream());
+			ParserDelegator parser = new ParserDelegator();
+			MyParserCallback callback = new MyParserCallback();
+			parser.parse(reader, callback, true);
+			// default as appear only 1
 
-		for (String w : words) {
-			w = w.toLowerCase();
-			if (!ignore_words.contains(w) && !blacklist_words.contains(w)) {
-				if (!keywordUrlMap.containsKey(w)) {
-					//if not appear before, add new urlObject
-					Set<UrlObject> setA = new HashSet<UrlObject>();
-					UrlObject newUrl=new UrlObject(urlPool.get(0), callback.title, 1);
-					setA.add(newUrl);
-					keywordUrlMap.put(w, setA);
-//					uniqueWords.add(w);
-//					WordsCount.add(1);
+			for (String w : words) {
+				w = w.toLowerCase();
+				if (!ignore_words.contains(w) && !blacklist_words.contains(w)) {
+					if (!keywordUrlMap.containsKey(w)) {
+						// if not appear before, add new urlObject
+						Set<UrlObject> setA = new HashSet<UrlObject>();
+						UrlObject newUrl = new UrlObject(urlPool.get(0), callback.title, 1);
+						setA.add(newUrl);
+						keywordUrlMap.put(w, setA);
 
-				} else if (keywordUrlMap.containsKey(w)) {
-					Set<UrlObject> setB = keywordUrlMap.get(w);
-					UrlObject newUrl=new UrlObject(urlPool.get(0), callback.title, 1);
-					UrlObject existinSet = isPresentinSet(setB, newUrl);
-					
-					
-					if (existinSet != null) {
-						existinSet.numberAppear++;
-						setB.remove(existinSet);
-						setB.add(existinSet);
-						keywordUrlMap.put(w, setB);
-					} else {
-						setB.add(newUrl);
-						keywordUrlMap.put(w, setB);
+
+					} else if (keywordUrlMap.containsKey(w)) {
+						Set<UrlObject> setB = keywordUrlMap.get(w);
+						UrlObject newUrl = new UrlObject(urlPool.get(0), callback.title, 1);
+						UrlObject existinSet = isPresentinSet(setB, newUrl);
+
+						if (existinSet != null) {
+							existinSet.numberAppear++;
+							setB.remove(existinSet);
+							setB.add(existinSet);
+							keywordUrlMap.put(w, setB);
+						} else {
+							setB.add(newUrl);
+							keywordUrlMap.put(w, setB);
+						}
+
 					}
-//					int a = uniqueWords.indexOf(w);
-//					int b = WordsCount.get(a) + 1;
-//					WordsCount.set(a, b);
 
 				}
 
+
+
 			}
-
-//			FileWriter writer = new FileWriter("keywordTemp_" + fileIndex + ".txt");
-//			for (int i = 0; i < uniqueWords.size(); i++) {
-//				String str = uniqueWords.get(i) + " " + WordsCount.get(i);
-//
-//				writer.write(str + System.lineSeparator());
-//			}
-//			writer.close();
-			
-			
-			//print the keywordUrlMap
-//			for (String i : keywordUrlMap.keySet()) {
-//				System.out.println("key: " + i + " value: " + keywordUrlMap.get(i));
-//			}
-			
-
 		}
 
+	}
+
+	public static String getRedirectUrl(String url) {
+		URL urlTmp = null;
+		String redUrl = null;
+		HttpURLConnection connection = null;
+
+		try {
+			urlTmp = new URL(url);
+		} catch (MalformedURLException e1) {
+			e1.printStackTrace();
+		}
+
+		try {
+			connection = (HttpURLConnection) urlTmp.openConnection();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		try {
+			connection.getResponseCode();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		redUrl = "http://" + connection.getURL().getAuthority().toString() + connection.getURL().getFile().toString();
+		connection.disconnect();
+
+		return redUrl;
 	}
 
 	public static UrlObject isPresentinSet(Set<UrlObject> setA, UrlObject link) {
@@ -204,15 +225,44 @@ public class Main {
 	public static URL toAbsURL(String str, URL ref) throws MalformedURLException {
 		URL url = null;
 
-		String prefix = ref.getProtocol() + "://" + ref.getHost() + ref.getPath();
+		String prefix = "http://" + ref.getHost() + ref.getPath();
 
-		if (ref.getPort() > -1)
+		if (ref.getPort() > -1) {
 			prefix += ":" + ref.getPort();
-
+		}
 		if (!str.startsWith("/")) {
-			int len = ref.getPath().length() - ref.getFile().length();
-			String tmp = ref.getPath().substring(0, len) + "/";
-			prefix += tmp.replace("//", "/");
+			// System.out.println(ref.getPath());
+			if (ref.getPath().length() > ref.getFile().length()) {
+				int len = ref.getPath().length() - ref.getFile().length();
+				int pathLen = ref.getPath().length();
+				// System.out.println(str.substring(0,pathLen));
+				if (str.length() >= pathLen) {
+					if (str.substring(0, pathLen).equals(ref.getPath())) {
+						str = str.substring(pathLen);
+					}
+				}
+				String tmp = ref.getPath().substring(0, len) + "/";
+				prefix += tmp.replace("//", "/");
+			} else {
+
+				int pathLen = ref.getPath().length();
+				// System.out.println(str.substring(0,pathLen));
+				if (str.length() >= pathLen) {
+					if (str.substring(0, pathLen).equals(ref.getPath())) {
+						str = str.substring(pathLen);
+					}
+				}
+			}
+
+		} else {
+
+			int pathLen = ref.getPath().length();
+			if (str.length() >= pathLen) {
+				if (str.substring(0, pathLen).equals(ref.getPath())) {
+					str = str.substring(pathLen);
+				}
+			}
+
 		}
 		url = new URL(prefix + str);
 
@@ -242,7 +292,7 @@ public class Main {
 		}
 	}
 
-	public static void isValidUrl(String url) {
+	public static boolean isValidUrl(String url) {
 		boolean isValid = true;
 		if (!urlPool.contains(url)) {
 			if (urlPool.size() < x) {
@@ -250,54 +300,58 @@ public class Main {
 				for (int i = 0; i < processedUrlPool.size(); i++) {
 					if (processedUrlPool.get(i).equals(url)) {
 						isValid = false;
-						System.out.println(url+" The url is processed already");
+						// System.out.println(url+" The url is processed already");
 						break;
 					}
 				}
 				if (isValid) {
 					// check black list
 					for (int i = 0; i < blacklist_urls.size(); i++) {
-						//check the blacklist url with "*"
+						// check the blacklist url with "*"
 						if (blacklist_urls.get(i).substring(blacklist_urls.get(i).length() - 1).equals("*")) {
 							if ((blacklist_urls.get(i).length() - 1) <= url.length()) {
 								if (url.substring(0, blacklist_urls.get(i).length() - 1).equals(
 										blacklist_urls.get(i).substring(0, blacklist_urls.get(i).length() - 1))) {
 									isValid = false;
-									System.out.println(url+" url is in the blacklist");
+									// System.out.println(url+" url is in the blacklist");
 									break;
 								}
 							}
 						} else if (url.equals(blacklist_urls.get(i))) {
 							isValid = false;
-							System.out.println(url+" url is in the blacklist");
+							// System.out.println(url+" url is in the blacklist");
 							break;
 						}
 					}
 				}
 			} else {
 				isValid = false;
-				System.out.println("url pool is full");
+				// System.out.println("url pool is full");
 			}
 		} else {
 			isValid = false;
-			System.out.println(url+" urllink is already in url pool");
+			// System.out.println(url+" urllink is already in url pool");
 		}
-		if (isValid) {
-			urlPool.add(url);
-		}
+		return isValid;
 	}
 
-	// get all the html content with tag
-	/*
-	 * static String loadWebPage(String urlString) { byte[] buffer = new byte[1024];
-	 * String content = new String(); try { URL url = new URL(urlString);
-	 * InputStream in = url.openStream(); int len; while((len = in.read(buffer)) !=
-	 * -1) content += new String(buffer); } catch (IOException e) { content =
-	 * "<h1>Unable to download the page</h1>" + urlString; } return content; }
-	 */
-	public static void main(String[] args) throws IOException {
+	public static boolean isValidProcessedUrl(String url) {
+		boolean isValid = true;
 
-		//main logic
+		for (int i = 0; i < processedUrlPool.size(); i++) {
+			if (processedUrlPool.get(i).equals(url)) {
+				isValid = false;
+				// System.out.println(url+" The url is processed already");
+				break;
+			}
+		}
+
+		return isValid;
+	}
+
+	public static void main(String[] args) throws Exception {
+
+		// main logic
 		// get the ignore words, blacklist words,url into array list
 
 		try {
@@ -305,51 +359,67 @@ public class Main {
 		} catch (Exception e) {
 			System.out.println(e);
 		}
+		// user input
 		Scanner in = new Scanner(System.in);
 		System.out.println("Enter x value :");
 		x = in.nextInt();
-		
+
 		System.out.println("Enter y value :");
 		y = in.nextInt();
-		
+
 		System.out.println("Enter the url :");
 		String url = in.next();
-		isValidUrl(url);
+		if (isValidUrl(getRedirectUrl(url))) {
+			urlPool.add(url);
+		}
 		
-		if(urlPool.size()>0) {
-		while(processedUrlPool.size()<y) {
-			System.out.println(urlPool);
-			// System.out.println(loadPlainText(url));
-			getUniqueWords((loadPlainText(urlPool.get(0))), 1); //insert the key value pair in keywordUrlPool hashmap
-			List<String> urlList =getURLs(url);
-			System.out.println(urlList);
-			processedUrlPool.add(urlPool.get(0)); // insert the url into processed url pool
-			urlPool.remove(0); //delete in url pool
-			
-			for (String temp : urlList) {
-				isValidUrl(temp);
+		if (urlPool.size() > 0) {
+			int i = 1;
+
+			while (processedUrlPool.size() < y) {
+				System.out.println(i + " ******************************************");
+				System.out.println(urlPool);
+				// System.out.println(loadPlainText(url));
+
+				String reUrl = getRedirectUrl(urlPool.get(0));
+				System.out.println(reUrl);
+				// check the redirect link is not in processedUrlPool
+				if (isValidProcessedUrl(reUrl)) {
+					getUniqueWords((loadPlainText(reUrl)), 1); // insert the key value pair in keywordUrlPool hashmap
+					List<String> urlList = getURLs(reUrl);
+					//System.out.println(urlList);
+					processedUrlPool.add(reUrl); // insert the url into processed url pool
+					urlPool.remove(0); // delete in url pool
+					if (urlList != null) {
+						for (String temp : urlList) {
+							if (isValidUrl(temp)) {
+								urlPool.add(temp);//add link into url pool
+							}
+						}
+					}
+					i++;
+				} else {
+					urlPool.remove(0);
 				}
-			
 			}
-		}else {
+		} else {
 			System.out.println("Invalid link");
 		}
-		//serialize the hashmap
-//		try
-//        {
-//               FileOutputStream fos =
-//                  new FileOutputStream("hashmap.ser");
-//               ObjectOutputStream oos = new ObjectOutputStream(fos);
-//               oos.writeObject(keywordUrlMap);
-//               oos.close();
-//               fos.close();
-//               System.out.println("Serialized HashMap data is saved in hashmap.ser");
-//        }catch(IOException ioe)
-//         {
-//               ioe.printStackTrace();
-//         }
+		// serialize the hashmap
+		try
+        {
+               FileOutputStream fos =
+                  new FileOutputStream("hashmap.ser");
+               ObjectOutputStream oos = new ObjectOutputStream(fos);
+               oos.writeObject(keywordUrlMap);
+               oos.close();
+               fos.close();
+               System.out.println("Serialized HashMap data is saved in hashmap.ser");
+        }catch(IOException ioe)
+         {
+               ioe.printStackTrace();
+         }
 
-		
 		// de-serial the hash map
 //		 try
 //	      {
@@ -372,13 +442,12 @@ public class Main {
 //	         c.printStackTrace();
 //	         return;
 //	      }
-		 
-		 System.out.println(urlPool);
-		 System.out.println(processedUrlPool);
-		for (String i : keywordUrlMap.keySet()) {
-			System.out.println("key: " + i + " value: " + keywordUrlMap.get(i));
-		}
 
+		System.out.println(urlPool);
+		System.out.println(processedUrlPool);
+//		for (String i : keywordUrlMap.keySet()) {
+//			System.out.println("key: " + i + " value: " + keywordUrlMap.get(i));
+//		}
 
 	}
 
